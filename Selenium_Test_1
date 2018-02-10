@@ -1,0 +1,48 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait # available since 2.4.0
+from selenium.webdriver.support import expected_conditions as EC # available since 2.26.0
+from selenium.webdriver.common.action_chains import ActionChains
+import time
+
+# Create a new instance of the Firefox driver
+driver = webdriver.Firefox()
+
+driver.get(
+    "http://w3.huawei.com/ibilling/#!ibilling/docmanage/mydoc/myDocManagement.html")
+driver.find_element_by_id("uid").send_keys("twx277448")
+driver.find_element_by_id("password").send_keys("True2017@")
+driver.find_element_by_name("Submit").click()
+
+sitelist=["CMI2019_A850on900_UPC1","BKA9216"]
+
+element = WebDriverWait(driver, 180).until(EC.presence_of_element_located((By.ID, "contractNo")))
+if element:
+    # 等待查询元素可见
+    WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.ID, "contractNo")))
+    contractno = driver.find_element_by_id("contractNo")
+    dnno = driver.find_element_by_id("siteCode")
+    contractno.send_keys("0007641600170E")
+
+    driver.find_element_by_xpath("//form[@id='openDocFrom']/div/div/ul/li[6]/span/a").click()
+    time.sleep(1)
+    # 通过ActionChains中的单击操作选中文本项
+    cpart = driver.find_element_by_xpath("//div[@id='cpartTypes_ddl']/div[2]/ul/li[4]/span")
+    ActionChains(driver).click(cpart).perform()
+    time.sleep(1)
+    # 点击其他地方收起下拉
+    single_click = driver.find_element_by_xpath("//form[@id='openDocFrom']/div/div/ul[2]")
+    ActionChains(driver).click(single_click).perform()
+
+for site in sitelist:
+    try:
+        dnno.clear()
+        dnno.send_keys(site)
+    except:
+        print(site+"query error"+"/n")
+    else:
+        driver.find_element_by_id("btnSearch").click()
+        time.sleep(20)
+        #d等待20S后进行截图保存
+        driver.save_screenshot(site+".png")
+driver.close()

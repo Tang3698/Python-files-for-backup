@@ -1,0 +1,30 @@
+from PyPDF2 import PdfFileReader, PdfFileWriter
+import os
+
+os.chdir(r'd:\Work_201712_PCM\20171225')
+filename=r'.\pdf_all.txt'
+change_log=open(r'pdf_all_log.txt','w+')
+
+with open(filename, 'r') as f:
+    file_path=f.readlines()
+for pdf_file_path in file_path:
+    try:
+        pdf_file_path=pdf_file_path.replace('\n',"")  #删除结尾的换行符
+        pdf = PdfFileReader(pdf_file_path, "rb")     #读取PDF文档
+        pdf_out_file=PdfFileWriter()                  #设置写入文件
+        page_count=pdf.getNumPages()                 #读取pdf文件页数
+        get_pdf_name=pdf_file_path.split('\\')      #文件名，用于记录修改结果
+        number=get_pdf_name.__len__()
+        pdf_name=get_pdf_name[number-1]
+        print(pdf_name+": "+str(page_count))
+        if page_count > 1:
+            for i in range(1,page_count):              #从第2页开始存储
+                pdf_out_file.addPage(pdf.getPage(i))
+            pdf_out_file.write(open(pdf_file_path, 'wb'))
+
+        change_log.write(pdf_name+'\n')
+        print(pdf_name+"with"+str(page_count)+ "is changed successfully")
+
+    except:
+        print(pdf_file_path)
+        change_log.write(pdf_file_path + '\n')

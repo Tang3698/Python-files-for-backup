@@ -1,0 +1,51 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait # available since 2.4.0
+from selenium.webdriver.support import expected_conditions as EC # available since 2.26.0
+from selenium.webdriver.common.action_chains import ActionChains
+import time
+
+# Create a new instance of the Firefox driver
+driver = webdriver.Firefox()
+
+# go to the google home page
+driver.get(
+    "https://login.huawei.com/login/?redirect=http%3A%2F%2Fw3.huawei.com%2Fibilling%2F%23!ibilling%2Fmydoc%2Fdoc%2FbillingDocManagement.html")
+time.sleep(2)
+driver.find_element_by_id("uid").send_keys("twx277448")
+driver.find_element_by_id("password").send_keys("True2017@")
+driver.find_element_by_name("Submit").click()
+
+sitelist=["CCS8617","BKA9216"]
+
+for site in sitelist:
+    element = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "contractNo")))
+    if element:
+        # 等待查询元素可见
+        WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.ID, "contractNo")))
+        contractno = driver.find_element_by_id("contractNo")
+        dnno = driver.find_element_by_id("dnno")
+        contractno.send_keys("0007641600170E")
+        driver.find_element_by_xpath("//form[@id='openDocFrom']/div/div/ul/li[6]/span/a").click()
+        time.sleep(1)
+
+        #检查选择的文本
+        a=driver.find_element_by_xpath("//div[@id='cpartTypes_ddl']/div[2]/ul/li[4]/span").text
+        print(a)
+        #通过ActionChains中的单击操作选中文本项
+        cpart=driver.find_element_by_xpath("//div[@id='cpartTypes_ddl']/div[2]/ul/li[4]/span")
+        ActionChains(driver).click(cpart).perform()
+        time.sleep(1)
+        #点击其他地方收起下拉
+        single_click=driver.find_element_by_xpath("//form[@id='openDocFrom']/div/div/ul[2]")
+        ActionChains(driver).click(single_click).perform()
+
+        try:
+            dnno.send_keys(site)
+            driver.find_element_by_id("btnSearch").click()
+            time.sleep(10)
+            #d等待20S后进行截图保存
+            driver.save_screenshot(site+".png")
+        finally:
+            driver.refresh()
+driver.close()

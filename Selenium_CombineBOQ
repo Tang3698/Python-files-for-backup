@@ -1,0 +1,46 @@
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait # available since 2.4.0
+from selenium.webdriver.support import expected_conditions as EC # available since 2.26.0
+from selenium.webdriver.common.action_chains import ActionChains
+import time
+
+# Create a new instance of the Firefox driver
+driver = webdriver.Firefox()
+
+driver.get(
+    "http://w3.huawei.com/ibilling/#!ibilling/docmanage/mydoc/myDocManagement.html")
+driver.find_element_by_id("uid").send_keys("twx277448")
+driver.find_element_by_id("password").send_keys("True2017@")
+driver.find_element_by_name("Submit").click()
+
+sitelist=["BKN7168_Villages2_UPC3","BKN7167_Villages2_UPC3","BKN7166_Villages2_UPC3","BKN7164_Villages2_UPC3","BKN7163_Villages2_UPC3","BKN7152_Villages2_UPC3","BKN7145_Villages2_UPC3","BKN7143_Villages2_UPC3","BKN7138_Villages2_UPC3","BKN7135_Villages2_UPC3"]
+element = WebDriverWait(driver, 20).until(EC.presence_of_element_located((By.ID, "siteCode")))
+
+if element:
+    WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.ID, "siteCode")))
+    driver.find_element_by_id("contractNo").send_keys("0007641700250Q")
+    dnno = driver.find_element_by_id("siteCode")
+    driver.find_element_by_xpath("//form[@id='myDocForm']/div/div/ul/li[9]/span/a").click()
+    time.sleep(1)
+    cpart1 = driver.find_element_by_xpath("//div[@id='cpartTypes_ddl']/div[2]/ul/li")
+    cpart2 = driver.find_element_by_xpath("//div[@id='cpartTypes_ddl']/div[2]/ul/li[4]")
+    ActionChains(driver).click(cpart1).perform()
+    ActionChains(driver).click(cpart2).perform()
+
+    single_click = driver.find_element_by_xpath("//ul[@id='advancedSearch_ul']/li")
+    ActionChains(driver).click(single_click).perform()
+
+for site in sitelist:
+    try:
+       dnno.clear()
+       dnno.send_keys(site)
+       driver.find_element_by_id("btnSearch").click()
+       WebDriverWait(driver,20).until(EC.visibility_of_element_located((By.ID,"myDocGridTable")))
+       time.sleep(2)
+       driver.find_element_by_css_selector(".igrid-selectAll > div:nth-child(1) > span:nth-child(1)").click()
+       driver.find_element_by_id("btnMergeBOQ").click()
+       time.sleep(2)
+       print(site + " query done" + "/n")
+    except:
+       print(site+"query error"+"/n")
